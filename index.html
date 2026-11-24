@@ -68,6 +68,15 @@ if(conf.url&&conf.key){
     if(error){er.textContent='Correo o contraseña incorrectos.';return}
     const md=data.user.user_metadata||{};if(!PAG[md.rol]){er.textContent='Esta cuenta no tiene perfil asignado.';await sb.auth.signOut();return}
     entrar(md.nombre,md.rol)};
+}else if((window.DEMO_CUENTAS||[]).length){
+  const f=document.getElementById('fLogin');f.hidden=false;
+  document.querySelector('#fLogin .sub').textContent='Entra con tu correo; la contraseña elige el perfil. Los cambios se guardan en este navegador.';
+  const sha=async t=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)))).map(b=>b.toString(16).padStart(2,'0')).join('');
+  f.onsubmit=async e=>{e.preventDefault();const er=document.getElementById('err');er.textContent='';
+    const h=await sha(document.getElementById('em').value.trim().toLowerCase()+'|'+document.getElementById('pw').value);
+    const c=window.DEMO_CUENTAS.find(x=>x.h===h);
+    if(!c){er.textContent='Correo o contraseña incorrectos.';return}
+    entrar(c.nombre,c.rol)};
 }else{
   const d=document.getElementById('demo');d.hidden=false;
   const box=document.getElementById('perfiles');

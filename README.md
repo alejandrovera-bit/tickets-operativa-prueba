@@ -14,8 +14,9 @@ Funciona en computadora y en celular (se adapta al ancho de la pantalla).
 
 ## Dos modos
 
-1. **Demo** (por defecto, `js/config.js` vacío). Se elige un perfil en la entrada y los cambios
-   se guardan solo en ese navegador. Sirve para ver la propuesta sin configurar nada.
+1. **Demo** (por defecto, sin Supabase en `js/config.js`). Se entra con correo y contraseña de las
+   cuentas de `DEMO_CUENTAS` (en el repo solo está su hash) y la contraseña elige el perfil.
+   Los cambios se guardan solo en ese navegador. Sirve para ver la propuesta sin configurar nada.
 2. **Compartido** (con Supabase). Cada quien entra con su cuenta y todos ven los mismos tickets:
    lo que registra el operador en su celular lo ve el supervisor en el suyo. Los cambios se guardan
    solos y la lista se actualiza cada 8 segundos.
