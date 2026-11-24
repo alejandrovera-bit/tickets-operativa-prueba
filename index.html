@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tickets Vivook · Prueba</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F7F9FB;--card:#fff;--line:#DDE4E9;--soft:#EDF2F5;--t1:#0A3D4F;--t2:#4C5B65;--t3:#6B7B86;--blue:#07A1C2;--blue7:#09748E;--blue50:#EBF7FA;--red:#E44634;--orange:#F2A23E;
+  --fd:'Plus Jakarta Sans',-apple-system,sans-serif;--fb:'DM Sans',-apple-system,sans-serif;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0E1A20;--card:#15252D;--line:#25404B;--soft:#1B313B;--t1:#EAF3F6;--t2:#B4C4CB;--t3:#8DA1AA;--blue50:#0F3440;--blue7:#8FD4E3;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0E1A20;--card:#15252D;--line:#25404B;--soft:#1B313B;--t1:#EAF3F6;--t2:#B4C4CB;--t3:#8DA1AA;--blue50:#0F3440;--blue7:#8FD4E3;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--t1);font:400 15px/1.45 var(--fb);display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.box{width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px 22px}
+.eye{font:700 11px var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
+h1{font:800 26px/1.15 var(--fd);letter-spacing:-.02em;margin:6px 0 6px}
+.sub{color:var(--t2);margin:0 0 18px}
+label{display:block;font:600 12px var(--fb);color:var(--t3);margin:12px 0 6px}
+input{width:100%;height:48px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font:500 16px var(--fb);background:var(--card);color:var(--t1)}
+input:focus{outline:2px solid var(--blue);outline-offset:0;border-color:var(--blue)}
+.btn{width:100%;height:48px;margin-top:20px;border:0;border-radius:10px;background:var(--blue);color:#fff;font:700 15px var(--fb);cursor:pointer}
+.btn:disabled{opacity:.6}
+.err{color:var(--red);font:600 13px var(--fb);margin-top:12px;min-height:18px}
+.perfiles{display:grid;gap:8px}
+.perfiles button{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--t1);text-align:left;cursor:pointer;font:600 15px var(--fb)}
+.perfiles button:hover{border-color:var(--blue)}
+.ini{flex:none;width:36px;height:36px;border-radius:50%;background:var(--blue50);color:var(--blue7);display:grid;place-items:center;font:700 13px var(--fb)}
+.perfiles small{display:block;font:500 12px var(--fb);color:var(--t3)}
+.nota{margin-top:18px;padding:10px 12px;border-radius:10px;background:var(--soft);color:var(--t2);font-size:13px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main class="box">
+  <div class="eye">Prueba · nada se conecta a Vivook</div>
+  <h1>Tickets de operación</h1>
+
+  <form id="fLogin" hidden>
+    <p class="sub">Entra con la cuenta de prueba que te dieron.</p>
+    <label for="em">Correo</label><input id="em" type="email" autocomplete="username" required>
+    <label for="pw">Contraseña</label><input id="pw" type="password" autocomplete="current-password" required>
+    <button class="btn" id="bOk" type="submit">Entrar</button>
+    <div class="err" id="err" role="alert"></div>
+  </form>
+
+  <section id="demo" hidden>
+    <p class="sub">Modo demo: elige un perfil. Los cambios se guardan solo en este navegador.</p>
+    <div class="perfiles" id="perfiles"></div>
+    <div class="nota">Para que todos compartan los mismos datos hay que configurar la base (ver README).</div>
+  </section>
+</main>
+<script src="js/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const PAG={op:'operador.html',sup:'supervisor.html',adm:'admin.html'};
+const DEMO=[['Mario Ruiz','op','Operador'],['Luis Pérez','op','Operador'],['Jorge Díaz','op','Operador'],['Ramón Cruz','op','Operador'],['Sofía León','sup','Supervisor'],['Patricia Vega','adm','Administrador']];
+function entrar(nombre,rol){sessionStorage.setItem('vvkYo',nombre);sessionStorage.setItem('vvkRol',rol);location.href=PAG[rol]}
+const conf=window.SB_CONF||{};
+if(conf.url&&conf.key){
+  const sb=supabase.createClient(conf.url,conf.key);
+  const f=document.getElementById('fLogin');f.hidden=false;
+  sb.auth.getSession().then(({data:{session}})=>{const md=session&&session.user.user_metadata;if(md&&PAG[md.rol])entrar(md.nombre,md.rol)});
+  f.onsubmit=async e=>{e.preventDefault();const b=document.getElementById('bOk'),er=document.getElementById('err');b.disabled=true;er.textContent='';
+    const {data,error}=await sb.auth.signInWithPassword({email:document.getElementById('em').value.trim(),password:document.getElementById('pw').value});
+    b.disabled=false;
+    if(error){er.textContent='Correo o contraseña incorrectos.';return}
+    const md=data.user.user_metadata||{};if(!PAG[md.rol]){er.textContent='Esta cuenta no tiene perfil asignado.';await sb.auth.signOut();return}
+    entrar(md.nombre,md.rol)};
+}else{
+  const d=document.getElementById('demo');d.hidden=false;
+  const box=document.getElementById('perfiles');
+  DEMO.forEach(([n,r,l])=>{const b=document.createElement('button');b.type='button';
+    const i=document.createElement('span');i.className='ini';i.textContent=n.split(' ').map(w=>w[0]).join('');
+    const t=document.createElement('span');t.textContent=n;const s=document.createElement('small');s.textContent=l;t.appendChild(s);
+    b.append(i,t);b.onclick=()=>entrar(n,r);box.appendChild(b)});
+}
+</script>
+</body>
+</html>
